@@ -1,6 +1,5 @@
-
 /*
- * *** YOUR NAME GOES HERE / YOUR SECTION NUMBER ***
+ * *** BRIANNA FARINANGO / 002 ***
  *
  * This java file is a Java object implementing simple AVL Tree.
  * You are to complete the deleteElement method.
@@ -342,26 +341,74 @@ class LUC_AVLTree {
      */
 
     private Node deleteElement(int value, Node node) {
+        // base case: if node is null, value not found
+        if (node == null)
+            return null;
 
-        /*
-         * ADD CODE HERE
-         * 
-         * NOTE, that you should use the existing coded private methods
-         * in this file, which include:
-         *      - minValueNode,
-         *      - getMaxHeight,
-         *      - getHeight,
-         *      - getBalanceFactor,
-         *      - LLRotation
-         *      - RRRotation,
-         *      - LRRotation,
-         *      - RLRotation.
-         *
-         * To understand what each of these methods do, see the method prologues and
-         * code for each. You can also look at the method InsertElement, as it has do
-         * do many of the same things as this method.
-         */
+        // recursively search for the node to delete
+        if (value < node.value) {
+            // if value is in left subtree, recursively delete from there
+            node.leftChild = deleteElement(value, node.leftChild);
+        } else if (value > node.value) {
+            // if value is in right subtree, recursively delete from there
+            node.rightChild = deleteElement(value, node.rightChild);
+        } else {
+            // node to delete found. Handle the 4 cases:
 
+            // scenario 1: Leaf node, return null (which removes node)
+            if (node.leftChild == null && node.rightChild == null) {
+                return null;
+            }
+
+            // scenario 2: interior node with only left subtree
+            // replace node with its left child
+            else if (node.rightChild == null) {
+                return node.leftChild;
+            }
+
+            // scenario 3: interior node with only right subtree
+            // replace node with its right child
+            else if (node.leftChild == null) {
+                return node.rightChild;
+            }
+
+            // scenario 4: interior node with both left and right subtrees
+            // replace node's value with the inorder successor's value,
+            // then delete the successor
+            else {
+                // find smallest value in right subtree (inorder successor)
+                Node successor = minValueNode(node.rightChild);
+                // copy successor's value to current node
+                node.value = successor.value;
+                // delete the successor
+                node.rightChild = deleteElement(successor.value, node.rightChild);
+            }
+        }
+
+        // update height of current node
+        node.height = getMaxHeight(getHeight(node.leftChild), getHeight(node.rightChild)) + 1;
+
+        // check balance factor and perform rotations if needed
+        int balanceFactor = getBalanceFactor(node);
+
+        // Left Left case
+        if (balanceFactor > 1 && getBalanceFactor(node.leftChild) >= 0) {
+            return LLRotation(node);
+        }
+        // Left Right case
+        if (balanceFactor > 1 && getBalanceFactor(node.leftChild) < 0) {
+            return LRRotation(node);
+        }
+        // Right Right case
+        if (balanceFactor < -1 && getBalanceFactor(node.rightChild) <= 0) {
+            return RRRotation(node);
+        }
+        // Right Left case
+        if (balanceFactor < -1 && getBalanceFactor(node.rightChild) > 0) {
+            return RLRotation(node);
+        }
+
+        // return new top of subtree
         return node;
     }
 
